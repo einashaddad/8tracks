@@ -4,6 +4,9 @@ MAX_DEGREE = 10000
 MAX_ERRORS = 1000
 MAX_NODES  = 10000000
 
+def get_genre(username):
+    pyquery.PyQuery(page('a.tag')[0]).attr('href')
+
 def get_followers(username):
     '''
     Returns a list of users following username [follower1, follower2, ...]

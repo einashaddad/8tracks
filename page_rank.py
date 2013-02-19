@@ -8,14 +8,42 @@ def demo():
 	'''
 	Simple Demo of the functionality
 	'''
-	with open('./8tranks.sample2', 'r') as f:
+	with open('./8tracks.sample', 'r') as f:
 		lines = [line.strip() for line in f.readlines()]
 		edges = [tuple(line.split('\t')) for line in lines]
 	graph = change_graph(edges)
 	ranks = compute_ranks(graph)
 	disp_popular(ranks)
+	genre_ranks = conditional_page_rank(graph, '/arabic')
 
-def change_graph(edges):
+def load_genre_data(filename):
+	'''
+	Returns a dictionary of users as key and the user's genre as the values
+	- {user: [genre1, genre2, ...], user2: [genre1, genre2, ...]}
+	'''
+	with open(filename, 'r') as f:
+		users = [line.strip() for line in f.readlines()]
+		genres = [user.split('\t') for user in users] #genres is a list of lists [[user, genre1 genre2], [user2, genre genre2]]
+		genres.pop(0) #this removes the initial newline in the file
+		return {genre[0]: set(genre[1].split()) for genre in genres if len(genre) > 1}
+
+def make_subgraph(graph, specified_genre):
+	'''
+	Makes a subgraph of the original graph, including the user only if associated with given genre
+	'''
+	genres_dict = load_genre_data('genre.info')
+	return {k:v for k, v in graph.items() \
+		if k in genres_dict and specified_genre in genres_dict[k]}
+
+def conditional_page_rank(graph, genre):
+	'''
+	Runs page rank on the new subgraph accoring to the genre selected
+	'''
+	subgraph = make_subgraph(graph, genre)
+	ranks = compute_ranks(subgraph)
+	disp_popular(ranks)
+
+def change_graph(edges):	
 	'''
 	Changes the graph from the form /follower /user to a dictionary where the 
 	keys are the users and the values are the followers of each user.
@@ -60,15 +88,17 @@ def disp_popular(ranks):
 	Displays a sorted representation of the dictionary of ranks and prints the 10 highest
 	ranked users.
 	'''
-	sorted_users = sorted(ranks.iteritems(), key=operator.itemgetter(1))
-	sorted_users.reverse()
-	# top 10
-	if len(ranks) < 10:
-		for i in xrange(len(ranks)):
-			print sorted_users[i][0]
-	else:
-		for i in xrange(10):
-			print sorted_users[i][0]
+	with open('popular.ranks', 'w') as f:
+
+		sorted_users = sorted(ranks.iteritems(), key=operator.itemgetter(1))
+		sorted_users.reverse()
+		# top 10
+		if len(ranks) < 10:
+			for i in xrange(len(ranks)):
+				f.write(sorted_users[i][0]) 
+		else:
+			for i in xrange(10):
+				f.write(sorted_users[i][0])
 
 if __name__ == '__main__':
     demo()
