@@ -7,8 +7,10 @@ This is an implementation of PageRank and a web scraper for 8tracks.com; ran on 
 * page_rank.py : Returns the top 10 users to follow on 8tracks
 
 To run with specified genre:
+
     python page_rank.py electronic
 
 To run on entire graph:
+
     python page_rank.py
     
