@@ -3,18 +3,21 @@ This is an implementation of PageRank derrived from the CS 101 course on Udacity
 '''
 
 import operator
+import sys
 
-def demo(): 
+def demo_all(): 
 	'''
-	Simple Demo of the functionality
+	Simple Demo of the functionality of implementing PageRank on the full graph
 	'''
-	with open('./8tracks.sample', 'r') as f:
-		lines = [line.strip() for line in f.readlines()]
-		edges = [tuple(line.split('\t')) for line in lines]
-	graph = change_graph(edges)
 	ranks = compute_ranks(graph)
 	disp_popular(ranks)
-	genre_ranks = conditional_page_rank(graph, '/arabic')
+	# genre_ranks = conditional_page_rank(graph, '/arabic')
+
+def demo_conditional(genre):
+	'''
+	Running PageRank on the partial graph according to genre
+	'''
+	genre_ranks = conditional_page_rank(graph, genre)	
 
 def load_genre_data(filename):
 	'''
@@ -31,7 +34,7 @@ def make_subgraph(graph, specified_genre):
 	'''
 	Makes a subgraph of the original graph, including the user only if associated with given genre
 	'''
-	genres_dict = load_genre_data('genre.info')
+	genres_dict = load_genre_data('./data/genre.info')
 	return {k:v for k, v in graph.items() \
 		if k in genres_dict and specified_genre in genres_dict[k]}
 
@@ -88,7 +91,7 @@ def disp_popular(ranks):
 	Displays a sorted representation of the dictionary of ranks and prints the 10 highest
 	ranked users.
 	'''
-	with open('popular.ranks', 'w') as f:
+	with open('./data/popular.ranks', 'w') as f:
 
 		sorted_users = sorted(ranks.iteritems(), key=operator.itemgetter(1))
 		sorted_users.reverse()
@@ -101,5 +104,12 @@ def disp_popular(ranks):
 				f.write(sorted_users[i][0])
 
 if __name__ == '__main__':
-    demo()
+	with open('./data/8tracks.edges', 'r') as f:
+		lines = [line.strip() for line in f.readlines()]
+		edges = [tuple(line.split('\t')) for line in lines]
+	graph = change_graph(edges)
 
+	if len(sys.argv) > 1:
+		demo_conditional('/'+sys.argv[1])
+	else:
+		demo_all()
